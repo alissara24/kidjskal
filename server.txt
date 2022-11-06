@@ -1,0 +1,38 @@
+เขียน file js ตามข้างล่างนี้เลย
+const express = require('express'); 			ใช้ express(library)
+const path = require('path'); 				ใช้ path(library)
+const app = express();						สร้างแอพโดยใช้ express
+const PORT = process.env.PORT || 3000;             ใช้ port 3000
+
+app.use('/', function (req, res, next) {		ที่หน้าแรก(localhost:3000/) ให้เรียก function นี้
+
+    var options = {						
+        root: path.join(__dirname)			เส้นทางfile
+    };
+    var fileName = 'web.html';				ไฟล์ชื่อweb.html(ตรงนี้ให้เปลี่ยนชื่อเป็น file ตัวเอง)
+    res.sendFile(fileName, options, function (err) { 
+        if (err) {						ถ้า error ให้บอก ว่า error เพราะอะไร
+            next(err);
+        } else {
+            console.log('Sent:', fileName); 		ถ้าไม่ error ให้โชว์ file html
+            next();
+        }
+    });
+});
+
+app.listen(PORT, function (err) {				เป็นคำสั่งเพื่อเช็กกว่า เปิด server สำเร็จ
+    if (err) console.log(err);				ถ้า error จะแสดง error
+    console.log("Server listening on PORT", PORT);	ถ้า เปิด server สำเร็จ จะโชว์คำว่า server listening on port 3000
+});
+
+app.get('/', function (req, res) {			เป็นคำสั่ง เช็กเวลาคนเข้า server เรา (จะมีหรือไม่มีก็ได้)
+    console.log("File Sent")					ถ้าคนเข้ามาแล้วส่ง file สำเร็จ จะขึ้นคำว่า file sent ที่ terminal
+    res.send();
+});
+
+*ก่อน run server ต้อง ไปที่ terminal พิม npm install express ก่อน
+พอ install เส็จแล้วก็ พิม node ตามด้วยชื่อไฟล์ (เช่น node app.js)
+เข้า http://localhost:3000/ ก็จะเจอเว็บเรา
+
+https://www.freecodecamp.org/news/how-to-deploy-an-application-to-heroku/
+ลิ้งนี้เป็นวิธี host server บน heroku 

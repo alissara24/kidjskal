@@ -1,0 +1,79 @@
+1.สร้าง cluster ใน mongodb
+2.เปลี่ยน .html เป็น .ejs 
+3.สร้าง folder ที่ชื่อ views และใส่  .ejs file รวมถึง resource file ลงไป
+4.เปลี่ยน code app.js เป็น
+
+const express = require("express");
+const app = express();
+const mongoose = require("mongoose");
+const PORT = process.env.PORT || 3000;
+
+app.set("view engine", "ejs");		#ใช้ ejs ในการเข้าถึง file
+
+app.use(express.static(__dirname + "/views"));		#บอกว่า resource อยู่ใน folder view		
+
+mongoose.connect(		#connect กับ mongodb
+  "mongodb+srv://natthaphon_sang:<password>@cluster0.bopiqj1.mongodb.net/test"
+);
+
+const visitorSchema = new mongoose.Schema({		#สร้าง database ใหม่ ชื่อ visitorSchema ใน cluster นี้มี name กับ count(ไว้นับจำนวนคนที่เข้ามา)
+  name: String,
+  count: Number,
+});
+
+/* Create the mongoose Model from the Schema */
+const Visitor = mongoose.model("Visitor", visitorSchema);		#ดึง database ที่สร้างมา มาใช้
+
+async function add_count() {		#สร้าง function สำหรับการ นับ
+  let visitors = await Visitor.findOne({ name: "localhost" });		#ให้ visitor เป็น data ที่อยู่ใน database
+
+  if (visitors == null) {		#ถ้า ยังไม่มีคนเข้าดูมาก่อนจะสร้าง data ของ visitor ที่ name ขื่อ 'localhost'
+    const beginCount = new Visitor({
+      name: "localhost",
+      count: 1,
+    });
+
+    beginCount.save();		#save ข้อมูลที่สร้างไป
+  } else {		#ถ้า มีคนเข้าครั้งที่ 2 เป็นต้นไปให้ ให้ count + 1
+    visitors.count += 1;
+    visitors.save();		#save ค่า count ลงใน database
+  }
+}
+
+#เราต้องสร้างเส้นทางของแต่ละหน้า
+app.get("/", async function (req, res) {
+  res.render("page1");		#เปลี่ยนจาก sendfile เป็น render
+  add_count();		#เรียกใช้ function นับคน
+});
+
+app.get("/page1", async function (req, res) {
+  res.render("page1");
+});
+
+app.get("/page2", async function (req, res) {
+  res.render("page2");
+});
+
+app.get("/page3", async function (req, res) {
+  let visitors = await Visitor.findOne({ name: "localhost" });
+  res.render("page3", {
+    count: visitors.count,
+  });
+});
+
+app.listen(PORT, function (err) {
+  if (err) console.log(err);
+  console.log("Server listening on PORT", PORT);
+});
+
+
+
+4.ลบ .html จาก anchor link
+5.ถ้าจะเรียกใช้ค่าใน database ให้ใช้<div><%= count %></div>
+เช่น
+<div class="visitor-counter">Visitors: <%= count %></div>
+
+npm install express
+npm install mongoose
+npm install ejs
+
